@@ -18,8 +18,8 @@ This is used to get the file count, subdirectory count and folder size for the p
         Get-DirectoryTreeSize -Path C:\Temp\ -Attrib a,h,d -AllItemsAndAllFolders
 
         |TotalFolderSize| TotalFileCount |Path     |   TotalDirectoryCount
-        :---------------|:----------------|:---------|:----------------------
-        258,68Mb       |           30   |C:\Temp\ |                 15
+        |:---------------|:----------------|:---------|:----------------------
+        |258,68Mb       |           30   |C:\Temp\ |                 15
 
     .EXAMPLE
         Get-DirectoryTreeSize -Path C:\Temp\ -Attrib a,h,s | select path,directorycount,filecount,foldersize
