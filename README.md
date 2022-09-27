@@ -11,12 +11,12 @@ EXAMPLES
 | :------------- | :------------- | :------- | :-------------------- |
 |`258,68Mb`        | `30`             | `C:\Temp\` | `15`                    |
 
-    .EXAMPLE
-        Get-DirectoryTreeSize -Path C:\Temp\ -Attrib a,h,s | select path,directorycount,filecount,foldersize
+-----------------
+ Get-DirectoryTreeSize -Path C:\Temp\ -Attrib a,h,s | select path,directorycount,filecount,foldersize
     
-        Path     DirectoryCount FileCount FolderSize
-        ----     -------------- --------- ----------
-        C:\Temp\              1        30 258,68Mb
+|Path   |  DirectoryCount | FileCount |FolderSize|
+| :------------- | :------------- | :------- | :-------------------- |
+|C:\Temp\        |      1        |30 |258,68Mb |
 
     .EXAMPLE
         Get-DirectoryTreeSize -Path C:\Temp\ -Attrib a,h,d -Recurse | select path,directorycount,filecount,foldersize
