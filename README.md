@@ -39,4 +39,18 @@ Get-DirectoryTreeSize -Path C:\Temp\ -Attrib a,h,d -Recurse | select path,direct
 | `.\WinSCP_FTP                    ` | `1`            | `0`       | `Empty`      |
 | `.\WinSCP_FTP.1.0.0              ` | `2`            | `0`       | `Empty`      |
 | `.\2020\oaads_images             ` | `0`            | `7`       | `444,58Kb`   |
+
+-----------------------
+Get-DirectoryTreeSize -Path C:\logs\  -Recurse | select path,directorycount,filecount,foldersize
+
+|Path         | DirectoryCount | FileCount | FolderSize |
+|:----        | :------------- | :---------|:---------- |
+|`C:\logs\`   | `5`            | ` 4`      | `106,95Kb` |
+|`.\msi`      | `0`            | `14`      | `30,26Mb`  |
+|`.\MSU`      | `0`            | ` 0`      | `Empty`    |
+|`.\PatchMgmt`| `0`            | ` 1`      | `77,70Kb`  |
+|`.\PKGDB `   | `0`            | ` 3`      | `3,16Mb`   |
+|`.\Trace`    | `0`            | ` 3`      | `148,17Kb` |
+
+
 </details>
