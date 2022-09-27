@@ -1,8 +1,10 @@
 # GetDirectoryTreeSize
 This is used to get the file count, subdirectory count and folder size for the path specified. The output will show the current folder stats unless you specify the "AllItemsAndAllFolders" property. Since this uses Get-ChildItem as the underlying structure, this supports local paths, network UNC paths and mapped drives.
 
-
-#EXAMPLE
+<details>
+ <summary>
+EXAMPLES
+</summary>
         Get-DirectoryTreeSize -Path C:\Temp\ -Attrib a,h,d -AllItemsAndAllFolders
 
 |TotalFolderSize | TotalFileCount | Path     |   TotalDirectoryCount |
@@ -38,3 +40,4 @@ This is used to get the file count, subdirectory count and folder size for the p
         .\WinSCP_FTP                                    1         0 Empty
         .\WinSCP_FTP.1.0.0                              2         0 Empty
         .\2020\oaads_images                             0         7 444,58Kb
+</details>
