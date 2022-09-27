@@ -1,13 +1,13 @@
 # GetDirectoryTreeSize
 This is used to get the file count, subdirectory count and folder size for the path specified. The output will show the current folder stats unless you specify the "AllItemsAndAllFolders" property. Since this uses Get-ChildItem as the underlying structure, this supports local paths, network UNC paths and mapped drives.
 
-PARAMETER <span style="color: green"><b>Recurse</b></span>
+PARAMETER `#00ff00`<b>Recurse</b>
 'Using this parameter will drill down to the end of the folder structure and output the filecount, foldercount and size of each folder respectively.'
      
-PARAMETER <span style="color: green"><b>AllItemsAndAllFolders</b></span>
+PARAMETER `#00ff00`<b>AllItemsAndAllFolders</b>
 'Using this parameter will get the total file count, total directory count and total folder size in MB for everything under that directory recursively.'
      
-.ARAMETER <span style="color: green"><b>Attrib</b></span>
+.ARAMETER `#00ff00`<b>Attrib</b>
 'Using this addtitional array parameter, will give you the option to include/filter for e.g. (H)IDDEN, (S)YSTEM, (D)IRECTORY, (A)RCHIVE, (R)EADONLY files and directories'
 
 <details>
