@@ -124,14 +124,14 @@ Function Get-DirectoryTreeSize {
      
                 if  ($AllItemsAndAllFolders) {
                     if ($Attrib) {
-                        $FileStats = (Get-ChildItem -Path $Path -File -Attributes $Attrib -ErrorAction Stop | Measure-Object -Property Length -Sum)
+                        $FileStats = (Get-ChildItem -Path $Path -File -Recurse -Attributes $Attrib -ErrorAction Stop | Measure-Object -Property Length -Sum)
                         $FileCount = $FileStats.Count
-                        $DirectoryCount = Get-ChildItem -Path $Path -Directory -Attributes $Attrib | Measure-Object | Select-Object -ExpandProperty Count
+                        $DirectoryCount = Get-ChildItem -Path $Path -Directory -Recurse -Attributes $Attrib | Measure-Object | Select-Object -ExpandProperty Count
                     }
                     else {
-                        $FileStats = (Get-ChildItem -Path $Path -File -ErrorAction Stop | Measure-Object -Property Length -Sum)
+                        $FileStats = (Get-ChildItem -Path $Path -File -Recurse -ErrorAction Stop | Measure-Object -Property Length -Sum)
                         $FileCount = $FileStats.Count
-                        $DirectoryCount = Get-ChildItem -Path $Path -Directory | Measure-Object | Select-Object -ExpandProperty Count
+                        $DirectoryCount = Get-ChildItem -Path $Path -Directory -Recurse | Measure-Object | Select-Object -ExpandProperty Count
                     }
                     if(($FileStats).sum -ge 1000000) {
                         $Size =  "{0}" -f ((($FileStats).sum)/1Mb).ToString('N') + 'Mb'
