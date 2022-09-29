@@ -13,6 +13,7 @@ PARAMETER <b>Attrib</b><br />
 You cannot use space between an operator and its attributes, but space is permitted before commas. The Attribute parameter supports the following attributes.
 
 Archive	| Offline | Compressed| ReadOnly | Device | ReparsePoint | Directory | SparseFile | Encrypted | System | Hidden	| Temporary | Normal | NotContentIndexed
+
 <br />
 Following Operators can be used to combine attributes:
 <br />
