@@ -19,14 +19,15 @@ Directory	| SparseFile |
 Encrypted	| System |
 Hidden	| Temporary |
 Normal	| NotContentIndexed |
-Following 
+
 <br />
-Operators can be used to combine attributes:
+Following Operators can be used to combine attributes:
 <br />
+
 ! = NOT <br />
 + = AND <br />
 , = OR <br />
-<br />  
+
 Following abbreviations are used for attributes:
 <br />
 D: Directory <br />
