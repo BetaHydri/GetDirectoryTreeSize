@@ -39,11 +39,11 @@ S: System <br />
  <summary>
 EXAMPLES
 </summary>
-        Get-DirectoryTreeSize -Path C:\Temp\ -Attrib a,h,d -AllItemsAndAllFolders
+        Get-DirectoryTreeSize -Path c:\temp -Attrib A,D,H,Normal -AllItemsAndAllFolders
 
 |TotalFolderSize | TotalFileCount | Path     |   TotalDirectoryCount |
 | :------------- | :------------- | :------- | :-------------------- |
-|`258,68Mb`        | `30`             | `C:\Temp\` | `15`                    |
+|`258,68Mb`        | `1025`             | `C:\Temp\` | `523`                    |
 
 -----------------
  Get-DirectoryTreeSize -Path C:\Temp\ -Attrib a,h,s | select path,directorycount,filecount,foldersize
