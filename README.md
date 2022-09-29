@@ -1,5 +1,5 @@
 # GetDirectoryTreeSize
-This is used to get the file count, subdirectory count and folder size for the path specified. The output will show the current folder stats unless you specify the "AllItemsAndAllFolders" property. Since this uses Get-ChildItem as the underlying structure, this supports local paths, network UNC paths and mapped drives.
+This is used to get the file count, subdirectory count and folder size for the path specified. The output will show the current folder stats unless you specify the "AllItemsAndAllFolders" property. Since this uses Get-ChildItem as the underlying structure, this supports local paths, network UNC paths and mapped drives. Furthermore it was developed to work also in PowerShell constrained language mode.
 
 PARAMETER <b>Recurse</b><br />
 'Using this parameter will drill down to the end of the folder structure and output the filecount, foldercount and size of each folder respectively.'
