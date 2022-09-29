@@ -8,8 +8,30 @@ PARAMETER <b>AllItemsAndAllFolders</b><br />
 'Using this parameter will get the total file count, total directory count and total folder size in MB for everything under that directory recursively.'
      
 PARAMETER <b>Attrib</b><br />
-'Using this addtitional array parameter, will give you the option to include/filter for e.g. (H)IDDEN, (S)YSTEM, (D)IRECTORY, (A)RCHIVE, (R)EADONLY files and directories'
+'–Attrib <FileAttributes>: This parameter gets files and folders with specified attributes. When you use this parameter, you can specify a complex combination of attributes.'<br />
+<br />
+You cannot use space between an operator and its attributes, but space is permitted before commas. The Attribute parameter supports the following attributes.
 
+Archive	| Offline
+Compressed| ReadOnly
+Device	| ReparsePoint
+Directory	| SparseFile
+Encrypted	| System
+Hidden	| Temporary
+Normal	| NotContentIndexed
+Following | Operators can be used to combine attributes:
+<br />
+!| NOT
++| AND
+,| OR
+<br />  
+Following abbreviations are used for attributes:
+<br />
+D: Directory
+H: Hidden
+R: Read-Only
+S: System
+<br />
 <details>
  <summary>
 EXAMPLES
