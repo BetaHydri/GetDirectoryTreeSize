@@ -151,14 +151,14 @@ Function Get-DirectoryTreeSize {
                     }
                     ConvertTo-PsObject $DirHashTable
                     #$results += $DirHashTable
-                }
-     
+                }  
                 if ($Recurse) {
-                    Get-DirectoryTreeSize -Path $Path
                     If ($Attrib) {
+                        Get-DirectoryTreeSize -Path $Path -Attrib $Attrib
                         $FolderList = Get-ChildItem -Path $Path -Directory -Attributes $Attrib -Recurse | Select-Object -ExpandProperty FullName
                     }
                     else {
+                        Get-DirectoryTreeSize -Path $Path
                         $FolderList = Get-ChildItem -Path $Path -Directory -Recurse | Select-Object -ExpandProperty FullName
                     }
                     if ($FolderList) {
