@@ -12,25 +12,27 @@ PARAMETER <b>Attrib</b><br />
 <br />
 You cannot use space between an operator and its attributes, but space is permitted before commas. The Attribute parameter supports the following attributes.
 
-Archive	| Offline
-Compressed| ReadOnly
-Device	| ReparsePoint
-Directory	| SparseFile
-Encrypted	| System
-Hidden	| Temporary
-Normal	| NotContentIndexed
-Following | Operators can be used to combine attributes:
+Archive	| Offline |
+Compressed| ReadOnly |
+Device	| ReparsePoint |
+Directory	| SparseFile |
+Encrypted	| System |
+Hidden	| Temporary |
+Normal	| NotContentIndexed |
+Following 
 <br />
-!| NOT
-+| AND
-,| OR
+Operators can be used to combine attributes:
+<br />
+! = NOT <br />
++ = AND <br />
+, = OR <br />
 <br />  
 Following abbreviations are used for attributes:
 <br />
-D: Directory
-H: Hidden
-R: Read-Only
-S: System
+D: Directory <br />
+H: Hidden <br />
+R: Read-Only <br />
+S: System <br />
 <br />
 <details>
  <summary>
