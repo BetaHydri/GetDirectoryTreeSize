@@ -24,9 +24,9 @@ Normal	| NotContentIndexed |
 Following Operators can be used to combine attributes:
 <br />
 
-! = NOT <br />
-+ = AND <br />
-, = OR <br />
+\! = NOT <br />
+\+ = AND <br />
+\, = OR <br />
 
 Following abbreviations are used for attributes:
 <br />
