@@ -48,7 +48,7 @@ EXAMPLES
 |`C:\Temp\`        |      `1`        |`30` |`258,68Mb` |
 
 -----------------
-Get-DirectoryTreeSize -Path C:\Temp\ -Attrib a,h,d -Recurse -Scal Kb | select path,directorycount,filecount,foldersize
+Get-DirectoryTreeSize -Path C:\Temp\ -Attrib a,h,d -Recurse -Scale Kb | select path,directorycount,filecount,foldersize
     
 |       Path                         | DirectoryCount | FileCount | FolderSize   |
 | :--------------------------------- | :------------- | :-------- | :----------- |
