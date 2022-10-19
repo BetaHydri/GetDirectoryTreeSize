@@ -80,30 +80,31 @@ Function Get-DirectoryTreeSize {
                 $Path = "$Path\"
             }
             $results = @()
+            #$ErrorActionPreference = "Continue"
         }
      
         PROCESS {
             try {
                 if ((-not $AllItemsAndAllFolders) -and (-not $Recurse)) {
                     if ($Attrib) {
-                        $FileStats = (Get-ChildItem -Path $Path -File -Attributes $Attrib -ErrorAction Stop | Measure-Object -Property Length -Sum)
+                        $FileStats = (Get-ChildItem -Path $Path -File -Attributes $Attrib -ErrorAction $ErrorActionPreference | Measure-Object -Property Length -Sum)
                         $FileCount = $FileStats.Count
-                        $DirectoryCount = Get-ChildItem -Path $Path -Directory -Attributes $Attrib | Measure-Object | Select-Object -ExpandProperty Count
+                        $DirectoryCount = Get-ChildItem -Path $Path -Directory -Attributes $Attrib -ErrorAction $ErrorActionPreference | Measure-Object | Select-Object -ExpandProperty Count
                     }
                     else {
-                        $FileStats = (Get-ChildItem -Path $Path -File -ErrorAction Stop | Measure-Object -Property Length -Sum)
+                        $FileStats = (Get-ChildItem -Path $Path -File -ErrorAction $ErrorActionPreference | Measure-Object -Property Length -Sum)
                         $FileCount = $FileStats.Count
-                        $DirectoryCount = Get-ChildItem -Path $Path -Directory | Measure-Object | Select-Object -ExpandProperty Count
+                        $DirectoryCount = Get-ChildItem -Path $Path -Directory -ErrorAction $ErrorActionPreference | Measure-Object | Select-Object -ExpandProperty Count
                     }
                     switch ($Scale) {
                         Kb {    $Size =  "{0}" -f ((($FileStats).sum)/1kb).ToString('N') + ' Kb'
                                 break
                         }
-
+                    
                         Mb {    $Size =  "{0}" -f ((($FileStats).sum)/1Mb).ToString('N') + ' Mb'
                                 break
                         }
-
+                    
                         Gb {    $Size =  "{0}" -f ((($FileStats).sum)/1Gb).ToString('N') + ' Gb'
                                 break
                         }
@@ -117,32 +118,32 @@ Function Get-DirectoryTreeSize {
                     ConvertTo-PsObject $DirHashTable
                     #$results += $DirHashTable
                 }
-     
+            
                 if  ($AllItemsAndAllFolders) {
                     if ($Attrib) {
-                        $FileStats = (Get-ChildItem -Path $Path -File -Recurse -Attributes $Attrib -ErrorAction Stop | Measure-Object -Property Length -Sum)
+                        $FileStats = (Get-ChildItem -Path $Path -File -Recurse -Attributes $Attrib -ErrorAction $ErrorActionPreference | Measure-Object -Property Length -Sum)
                         $FileCount = $FileStats.Count
-                        $DirectoryCount = Get-ChildItem -Path $Path -Directory -Recurse -Attributes $Attrib | Measure-Object | Select-Object -ExpandProperty Count
+                        $DirectoryCount = Get-ChildItem -Path $Path -Directory -Recurse -Attributes $Attrib  -ErrorAction $ErrorActionPreference | Measure-Object | Select-Object -ExpandProperty Count
                     }
                     else {
-                        $FileStats = (Get-ChildItem -Path $Path -File -Recurse -ErrorAction Stop | Measure-Object -Property Length -Sum)
+                        $FileStats = (Get-ChildItem -Path $Path -File -Recurse -ErrorAction $ErrorActionPreference| Measure-Object -Property Length -Sum)
                         $FileCount = $FileStats.Count
-                        $DirectoryCount = Get-ChildItem -Path $Path -Directory -Recurse | Measure-Object | Select-Object -ExpandProperty Count
+                        $DirectoryCount = Get-ChildItem -Path $Path -Directory -Recurse -ErrorAction $ErrorActionPreference | Measure-Object | Select-Object -ExpandProperty Count
                     }
                     switch ($Scale) {
                         Kb {    $Size =  "{0}" -f ((($FileStats).sum)/1kb).ToString('N') + ' Kb'
                                 break
                         }
-
+                    
                         Mb {    $Size =  "{0}" -f ((($FileStats).sum)/1Mb).ToString('N') + ' Mb'
                                 break
                         }
-
+                    
                         Gb {    $Size =  "{0}" -f ((($FileStats).sum)/1Gb).ToString('N') + ' Gb'
                                 break
                         }
                     }
-     
+                
                     $DirHashTable = [Ordered]@{
                         Path                 = $Path
                         TotalFileCount       = $FileCount
@@ -155,23 +156,23 @@ Function Get-DirectoryTreeSize {
                 if ($Recurse) {
                     If ($Attrib) {
                         Get-DirectoryTreeSize -Path $Path -Attrib $Attrib -Scale $Scale
-                        $FolderList = Get-ChildItem -Path $Path -Directory -Attributes $Attrib -Recurse | Select-Object -ExpandProperty FullName
+                        $FolderList = Get-ChildItem -Path $Path -Directory -Attributes $Attrib -Recurse -ErrorAction $ErrorActionPreference | Select-Object -ExpandProperty FullName
                     }
                     else {
                         Get-DirectoryTreeSize -Path $Path -Scale $Scale
-                        $FolderList = Get-ChildItem -Path $Path -Directory -Recurse | Select-Object -ExpandProperty FullName
+                        $FolderList = Get-ChildItem -Path $Path -Directory -Recurse -ErrorAction $ErrorActionPreference | Select-Object -ExpandProperty FullName
                     }
                     if ($FolderList) {
                         foreach ($Folder in $FolderList) {
                             if ($Attrib) {
-                                $FileStats = (Get-ChildItem -Path $Folder -File -Attributes $Attrib | Measure-Object -Property Length -Sum)
+                                $FileStats = (Get-ChildItem -Path $Folder -File -Attributes $Attrib -ErrorAction $ErrorActionPreference | Measure-Object -Property Length -Sum)
                                 $FileCount = $FileStats.Count
-                                $DirectoryCount = Get-ChildItem -Path $Folder -Directory -Attributes $Attrib | Measure-Object | Select-Object -ExpandProperty Count
+                                $DirectoryCount = Get-ChildItem -Path $Folder -Directory -Attributes $Attrib -ErrorAction $ErrorActionPreference | Measure-Object | Select-Object -ExpandProperty Count
                             }
                             else {
-                                $FileStats = (Get-ChildItem -Path $Folder -File | Measure-Object -Property Length -Sum)
+                                $FileStats = (Get-ChildItem -Path $Folder -File -ErrorAction $ErrorActionPreference | Measure-Object -Property Length -Sum)
                                 $FileCount = $FileStats.Count
-                                $DirectoryCount = Get-ChildItem -Path $Folder -Directory | Measure-Object | Select-Object -ExpandProperty Count
+                                $DirectoryCount = Get-ChildItem -Path $Folder -Directory -ErrorAction $ErrorActionPreference | Measure-Object | Select-Object -ExpandProperty Count
                             }
                             switch ($Scale) {
                                 Kb {    if ($FileCount -eq 0) {
@@ -183,7 +184,7 @@ Function Get-DirectoryTreeSize {
                                                 break
                                         }
                                     }
-        
+                                
                                 Mb {     if ($FileCount -eq 0) {
                                             $Size =  'Empty'
                                             break
@@ -193,7 +194,7 @@ Function Get-DirectoryTreeSize {
                                                 break
                                         }
                                     }
-        
+                                
                                 Gb {    if ($FileCount -eq 0) {
                                             $Size =  'Empty'
                                             break
@@ -218,15 +219,11 @@ Function Get-DirectoryTreeSize {
                 }
             } 
             catch {
-                Write-Error $_.Exception.Message
-                #Write-Error $_.CategoryInfo
-                #Write-Error $_.FullyQualifiedErrorId
+                Write-Warning -Message $_.Exception.Message
             }
-     
-        }
+        }   
      
         END {
-
             #$results
             # Clear Variables
             $null = $FileStats
@@ -252,8 +249,8 @@ function ConvertTo-PsObject {
 # SIG # Begin signature block
 # MIIx/wYJKoZIhvcNAQcCoIIx8DCCMewCAQExDzANBglghkgBZQMEAgEFADB5Bgor
 # BgEEAYI3AgEEoGswaTA0BgorBgEEAYI3AgEeMCYCAwEAAAQQH8w7YFlLCE63JNLG
-# KX7zUQIBAAIBAAIBAAIBAAIBADAxMA0GCWCGSAFlAwQCAQUABCC3JjV43WvQ/mb4
-# j2HlOMy0r4IwVjZfn3BDRXzvQWRao6CCLCowggWNMIIEdaADAgECAhAOmxiO+dAt
+# KX7zUQIBAAIBAAIBAAIBAAIBADAxMA0GCWCGSAFlAwQCAQUABCD0+fRraMN0848e
+# 2TyodO8gTcDYITU4AuCyc2Sc7agdoaCCLCowggWNMIIEdaADAgECAhAOmxiO+dAt
 # 5+/bUOIIQBhaMA0GCSqGSIb3DQEBDAUAMGUxCzAJBgNVBAYTAlVTMRUwEwYDVQQK
 # EwxEaWdpQ2VydCBJbmMxGTAXBgNVBAsTEHd3dy5kaWdpY2VydC5jb20xJDAiBgNV
 # BAMTG0RpZ2lDZXJ0IEFzc3VyZWQgSUQgUm9vdCBDQTAeFw0yMjA4MDEwMDAwMDBa
@@ -493,28 +490,28 @@ function ConvertTo-PsObject {
 # b3J0IEHDtlIxFzAVBgNVBAMMDkRhdGFwb3J0IENBIDAzAhMUAACY7VKIGShWnr8b
 # AAIAAJjtMA0GCWCGSAFlAwQCAQUAoIGEMBgGCisGAQQBgjcCAQwxCjAIoAKAAKEC
 # gAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcCAQQwHAYKKwYBBAGCNwIBCzEOMAwG
-# CisGAQQBgjcCARUwLwYJKoZIhvcNAQkEMSIEIBiRorYh4OupYSBkOqXPKTE2aXCC
-# iQCDvDtsmUiu+a6BMA0GCSqGSIb3DQEBAQUABIIBAEbLAzEPC9gE4ZWhMG0NtYEJ
-# OrRUBjwqANltDpUX29LfZCDE5L5mt4Rn6ZdlCBfTKVvqoKe8BrEsPghaqsTAAi4c
-# gvSmrxM4QOoUeODM93Ut5HiENVjVesDsY7OkVOkAaJ1DssP6b3/WLgzUNURp+7vG
-# 0xv+6eTE8z4E3mDA2QS/2CyNyuLDZtXIlB6nlH34dMmiEShLsbwo1BWFX6CVPf/I
-# e1QsdxPFagh8gwt8ipOF6Jri8DgfH5OJC8LiUQcYx1akxrzbmfVHXT1zaMiFzV5y
-# V1Q5oF9utDpCmabTh4caaywDLs9AkNKcKkY+1jwn2Pdwq+N2rtK7UJleOy3aQnuh
+# CisGAQQBgjcCARUwLwYJKoZIhvcNAQkEMSIEIC0JKBpCj+gkFV8pthozGpWfn4ui
+# bx4U0hqa9T7/BA9OMA0GCSqGSIb3DQEBAQUABIIBADLBxaksqvJ7dNQTCEu+DzLa
+# FOf/IENlC4M/sFaELUsPyDsUV0L9OJS3aWKkV/F3xdl97pEnz1+u+Fu0rB+asfJe
+# 4yc7l2WTP+KyxhEZ7fqt5q5R91L6V4sSJHQwYfgXgzssav1PGdmYJ5ADjPuCK7po
+# TSXGiVEJu3GP0vK4jX/EOmjBRMXdH703PXCa24dwpkjWpCgSuudwYxauzQm2Q6fP
+# U6hrk+GJ/20icb20gAoPltx6AScC98xA77TFkm4dEGTU81mYGrh17LliyHMrHIQz
+# IriXK771/NnturRaP26k5aVwqedDyyiy5dghs2gIHxd41NHmmOyQ2OCShZUH/nOh
 # ggMgMIIDHAYJKoZIhvcNAQkGMYIDDTCCAwkCAQEwdzBjMQswCQYDVQQGEwJVUzEX
 # MBUGA1UEChMORGlnaUNlcnQsIEluYy4xOzA5BgNVBAMTMkRpZ2lDZXJ0IFRydXN0
 # ZWQgRzQgUlNBNDA5NiBTSEEyNTYgVGltZVN0YW1waW5nIENBAhAMTWlyS5T6PCpK
 # PSkHgD1aMA0GCWCGSAFlAwQCAQUAoGkwGAYJKoZIhvcNAQkDMQsGCSqGSIb3DQEH
-# ATAcBgkqhkiG9w0BCQUxDxcNMjIxMDE5MTE0ODAyWjAvBgkqhkiG9w0BCQQxIgQg
-# ZYmMOzqKAYq4oZ0BEqYqc3WgaIboPrIxexVN2e2uh5gwDQYJKoZIhvcNAQEBBQAE
-# ggIAIf01szjuM4xaTx9S53KnAUJkSq6/ThF+WWpwIa3bm+OpZQW255NFJ8KHqzoh
-# 49GR/7/9Xel3LUML7+qJa1iWsTVjjZQKL/6s0LLFzNJ46Fv33TkmKWBvMOpt7NeW
-# oW6nBnObJwJ834b83Hf9E3/2jJPipo5tCbKbijMp4VG71A6jmZQxaAamEb5AkBeE
-# qMJqE27mm7SQKQx3VOEfRd8bXqi/sR/RJahWGms4lGLVRHRzWjg2TFFDPoYMoSYF
-# uViKchCheNttmtBij3Y+OcjeW53gU9NRYIF4/a/8fsRVMT8CFhg/fPNDJfJOG/u0
-# BZSWY36PApGtVawsuvhQb/44eCbnfND15bqrsd77Vx3VgQsaMTqwQqgY9wyuxpJv
-# /TDaQbE/9o0sNAGH3cqB7AfVrBYnL7XoTlYHMl+MYL0EEcP6wPgO8+GHWaixJmXW
-# 7q11+qTtx6u767tv1wO7d1FuAoyIl4m1wQeTta5rI3q87uhEdCEwy/ey9ldF0SYM
-# oSnQKvLjTYN3Nnt9WObkGvVE26VdLEKSo6Gu0uXv6YbP47qi7xOe9VdNmZXXxVXw
-# 91kWAZ/JKH4EjqGOMvb5hNJgA5VG/Cs+tZH6gtWczdJeCAjvbVWTd+aQOdWAjVTn
-# 7KRfoy7VNXztKPDs+5fhK8NhbpBaITDwRYZdrZTlDvs4Q18=
+# ATAcBgkqhkiG9w0BCQUxDxcNMjIxMDE5MTI1MDIyWjAvBgkqhkiG9w0BCQQxIgQg
+# XvhDllQvdwSbx6Lf3BOqnReT7ONtwNATTIOhALeJonIwDQYJKoZIhvcNAQEBBQAE
+# ggIAv2raxIOJ73+CmzYK4CWG8MrL5ZCqq+7Lu/c8PGLL+WeDo9gpusnYGmjyMG18
+# xLARjHnft0ZEoolXq8mOuMvARp8ozNa5vYaWVivpxF7FTGWX0kCOde+5KK0UbjVe
+# 2G3pJy72lBbjKh0FYnmrzRMyl3PJQnY8hD3T78HKGo/r9gXycb3Xjkw5HEOjrs2v
+# CckU9K9i9RJBBf/cPV2mGckqvBpNBmqK1Dt9cTInhblug9/iANDh3Lh2MyUgLwXp
+# ZKQuNc8Bsb5Inl0yt4ZPWyz1KTmqWbkAJhaPV/vKAwfH2sX6jZkbxhHaFEf6+n8s
+# gZsBC9NNcRNT8mlAm3y8ufhoZdDzASKJtQWDQss/DdtG2zFoJpaf7b6jn9w02HRv
+# opF8ZHAL3CS+CtdZwTmqPZ//J9JnmPCCJhv+hBOUYiFQv+UELxopSi4SeP35eiOg
+# 5CLg2GpNB12MtUTj4EEOAOs+/wGOQDqJLFiAeOD7GlVOzTrxtfypoZx/k05G1osR
+# Z+Gc3R44BbW95ZUwfu0a3RsPudGFu2ZM/Wwip85Ol8br5KWLxP0dFxRU6DI5MQI6
+# 9+/jyTK4bctCzhaVe/ldTgnWKVP/Rmygbvd/yOTfa8Co1cU8VUAzbtBIgY8i2M7f
+# lK5BjxzpVHihlQRZgZN6szjXAhrx5RmCheEh/i0POAlIlG4=
 # SIG # End signature block
