@@ -25,6 +25,7 @@ Following Operators can be used to combine attributes:
 Following abbreviations are used for attributes:
 <br />
 D: Directory <br />
+A: Archive <br />
 H: Hidden <br />
 R: Read-Only <br />
 S: System <br />
