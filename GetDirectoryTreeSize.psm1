@@ -14,41 +14,31 @@ Function Get-DirectoryTreeSize {
         Using this addtitional array parameter, will give you the option to include/filter for e.g. (H)IDDEN, (S)YSTEM, (D)IRECTORY, (A)RCHIVE, (R)EADONLY files and directories 
     
     .EXAMPLE
-        Get-DirectoryTreeSize -Path C:\Temp\ -Attrib a,h,d,Normal -AllItemsAndAllFolders
+        Get-DirectoryTreeSize -Path C:\Temp\ -Attrib a,h,d,Normal -AllItemsAndAllFolders -Scale Mb
 
         TotalFolderSize TotalFileCount Path     TotalDirectoryCount
         --------------- -------------- ----     -------------------
         2790,68Mb                  530 C:\Temp\                  15
 
     .EXAMPLE
-        Get-DirectoryTreeSize -Path C:\Temp\ -Attrib a,h,s | select path,directorycount,filecount,foldersize
+        Get-DirectoryTreeSize -Path C:\Temp\ -Attrib a,h,s -Scale Mb | select path,directorycount,filecount,foldersize
     
         Path     DirectoryCount FileCount FolderSize
         ----     -------------- --------- ----------
         C:\Temp\              1        30 258,68Mb
 
     .EXAMPLE
-        Get-DirectoryTreeSize -Path C:\Temp\ -Attrib a,h,d -Recurse | select path,directorycount,filecount,foldersize
+        Get-DirectoryTreeSize -Path C:\logs -Attrib a,h,d -Recurse -Scale Kb | select path,directorycount,filecount,foldersize
     
-        Path                               DirectoryCount FileCount FolderSize
-        ----                               -------------- --------- ----------
-        C:\Temp\                                       14        30 258,68Mb
-        .\2020                                          4         1 6,13Kb
-        .\DataportDCSNuGet                              1         0 Empty
-        .\GetProcess                                    0         3 2,77Kb
-        .\Jahres-CD-2017                                2         4 10,21Kb
-        .\Jahres-CD-2018                                2         4 10,21Kb
-        .\Jahres-CD-2019                                2         4 10,21Kb
-        .\MeinModuleProjekt                             6         4 6,58Kb
-        .\MikePoshScripts                               3        10 609,82Kb
-        .\PolicyAnalyzer                                1        14 13,38Mb
-        .\PSFramework                                   1         0 Empty
-        .\PSModuleDevelopment                           1         0 Empty
-        .\string                                        1         0 Empty
-        .\Windows_10_VDI_Optimize-master                6         5 41,61Kb
-        .\WinSCP_FTP                                    1         0 Empty
-        .\WinSCP_FTP.1.0.0                              2         0 Empty
-        .\2020\oaads_images                             0         7 444,58Kb
+        Path                                                DirectoryCount FileCount FolderSize
+        ----                                                -------------- --------- ----------
+        C:\logs\                                                         5        81 622,76 Kb
+        .\MSI                                                            1        41 34.084,91 Kb
+        .\MSU                                                            0         0 Empty
+        .\PatchMgmt                                                      0         1 16,25 Kb
+        .\PKGDB                                                          0         0 Empty
+        .\Trace                                                          0        33 552,52 Kb
+        .\MSI\Enterprise-Erstinstallation_10.7.0-3299.1.log              0        22 5.273,51 Kb
 
 #>
      
