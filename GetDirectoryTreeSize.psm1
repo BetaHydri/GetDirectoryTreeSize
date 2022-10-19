@@ -52,33 +52,36 @@ Function Get-DirectoryTreeSize {
 
 #>
      
-    [CmdletBinding(DefaultParameterSetName="Default")]
-     
+    [CmdletBinding(DefaultParameterSetName="ShowTopFolderAllItemsAndAllFolders")]
     param(
-        [Parameter(
-            Position = 0,
-            Mandatory = $true
-        )]
-        [string]  $Path,
-     
-     
+        [Parameter(Mandatory = $true,
+            ValueFromPipeline = $true,
+            ValueFromPipelineByPropertyName = $true)]
+        [string]$Path,
      
         [Parameter(
             Mandatory = $false,
-            ParameterSetName = "ShowRecursive"
-        )]
-        [switch]  $Recurse,
-     
-        [Parameter(
-            Mandatory = $false
-        )]
-        [array]  $Attrib,     
+            ValueFromPipelineByPropertyName = $true,
+            ParameterSetName = "ShowRecursive")]
+        [switch]$Recurse,
      
         [Parameter(
             Mandatory = $false,
-            ParameterSetName = "ShowTopFolderAllItemsAndAllFolders"
-        )]
-        [switch]  $AllItemsAndAllFolders
+            ValueFromPipelineByPropertyName = $true,
+            HelpMessage = "Enter Attributes e.g. -Attrib A,D,H")]
+        [array]$Attrib,     
+
+        [Parameter(
+            Mandatory = $true,
+            ValueFromPipelineByPropertyName = $true)]
+        [ValidateSet("Kb", "Mb", "Gb", IgnoreCase = $false)]
+        [string]$Scale,     
+     
+        [Parameter(
+            Mandatory = $false,
+            ParameterSetName = "ShowTopFolderAllItemsAndAllFolders",
+            ValueFromPipelineByPropertyName = $true)]
+        [switch]$AllItemsAndAllFolders
     )
      
         BEGIN {
@@ -87,7 +90,7 @@ Function Get-DirectoryTreeSize {
                 $Path = "$Path\"
             }
             $results = @()
-          }
+        }
      
         PROCESS {
             try {
@@ -102,16 +105,19 @@ Function Get-DirectoryTreeSize {
                         $FileCount = $FileStats.Count
                         $DirectoryCount = Get-ChildItem -Path $Path -Directory | Measure-Object | Select-Object -ExpandProperty Count
                     }
-                    if(($FileStats).sum -ge 1000000) {
-                        $Size =  "{0}" -f ((($FileStats).sum)/1Mb).ToString('N') + 'Mb'
+                    switch ($Scale) {
+                        Kb {    $Size =  "{0}" -f ((($FileStats).sum)/1kb).ToString('N') + ' Kb'
+                                break
+                        }
+
+                        Mb {    $Size =  "{0}" -f ((($FileStats).sum)/1Mb).ToString('N') + ' Mb'
+                                break
+                        }
+
+                        Gb {    $Size =  "{0}" -f ((($FileStats).sum)/1Gb).ToString('N') + ' Gb'
+                                break
+                        }
                     }
-                    elseif ($FileCount -eq 0) {
-                        $Size =  'Empty'
-                    }
-                    else {
-                        $Size =  "{0}" -f ((($FileStats).sum)/1kb).ToString('N') + 'Kb'
-                    }
-     
                     $DirHashTable = [Ordered]@{
                         Path                 = $Path
                         FileCount            = $FileCount
@@ -133,14 +139,18 @@ Function Get-DirectoryTreeSize {
                         $FileCount = $FileStats.Count
                         $DirectoryCount = Get-ChildItem -Path $Path -Directory -Recurse | Measure-Object | Select-Object -ExpandProperty Count
                     }
-                    if(($FileStats).sum -ge 1000000) {
-                        $Size =  "{0}" -f ((($FileStats).sum)/1Mb).ToString('N') + 'Mb'
-                    }
-                    elseif ($FileCount -eq 0) {
-                        $Size =  'Empty'
-                    }
-                    else {
-                        $Size =  "{0}" -f ((($FileStats).sum)/1kb).ToString('N') + 'Kb'
+                    switch ($Scale) {
+                        Kb {    $Size =  "{0}" -f ((($FileStats).sum)/1kb).ToString('N') + ' Kb'
+                                break
+                        }
+
+                        Mb {    $Size =  "{0}" -f ((($FileStats).sum)/1Mb).ToString('N') + ' Mb'
+                                break
+                        }
+
+                        Gb {    $Size =  "{0}" -f ((($FileStats).sum)/1Gb).ToString('N') + ' Gb'
+                                break
+                        }
                     }
      
                     $DirHashTable = [Ordered]@{
@@ -154,11 +164,11 @@ Function Get-DirectoryTreeSize {
                 }  
                 if ($Recurse) {
                     If ($Attrib) {
-                        Get-DirectoryTreeSize -Path $Path -Attrib $Attrib
+                        Get-DirectoryTreeSize -Path $Path -Attrib $Attrib -Scale $Scale
                         $FolderList = Get-ChildItem -Path $Path -Directory -Attributes $Attrib -Recurse | Select-Object -ExpandProperty FullName
                     }
                     else {
-                        Get-DirectoryTreeSize -Path $Path
+                        Get-DirectoryTreeSize -Path $Path -Scale $Scale
                         $FolderList = Get-ChildItem -Path $Path -Directory -Recurse | Select-Object -ExpandProperty FullName
                     }
                     if ($FolderList) {
@@ -173,14 +183,36 @@ Function Get-DirectoryTreeSize {
                                 $FileCount = $FileStats.Count
                                 $DirectoryCount = Get-ChildItem -Path $Folder -Directory | Measure-Object | Select-Object -ExpandProperty Count
                             }
-                            if(($FileStats).sum -ge 1000000) {
-                                $Size =  "{0}" -f ((($FileStats).sum)/1Mb).ToString('N') + 'Mb'
-                            }
-                            elseif ($FileCount -eq 0) {
-                                $Size =  'Empty'
-                            }
-                            else {
-                                $Size =  "{0}" -f ((($FileStats).sum)/1kb).ToString('N') + 'Kb'
+                            switch ($Scale) {
+                                Kb {    if ($FileCount -eq 0) {
+                                            $Size =  'Empty'
+                                            break     
+                                        }
+                                        else {
+                                                $Size =  "{0}" -f ((($FileStats).sum)/1kb).ToString('N') + ' Kb'
+                                                break
+                                        }
+                                    }
+        
+                                Mb {     if ($FileCount -eq 0) {
+                                            $Size =  'Empty'
+                                            break
+                                        }
+                                        else {
+                                                $Size =  "{0}" -f ((($FileStats).sum)/1Mb).ToString('N') + ' Mb'
+                                                break
+                                        }
+                                    }
+        
+                                Gb {    if ($FileCount -eq 0) {
+                                            $Size =  'Empty'
+                                            break
+                                        }
+                                        else {
+                                        $Size =  "{0}" -f ((($FileStats).sum)/1Gb).ToString('N') + ' Gb'
+                                        break
+                                        }
+                                    }
                             }
                             
                             $DirHashTable = [Ordered]@{
@@ -214,24 +246,24 @@ Function Get-DirectoryTreeSize {
             $null = $DirHashTable
             $null = $results
         }
-    }
+}
 
-    function ConvertTo-PsObject {
-        param (
+function ConvertTo-PsObject {
+    param (
             [hashtable]$Value = [Ordered]@{}
-        )
+    )
     
-        foreach ( $key in $Value.Keys | Where-Object { $Value[$_].GetType() -eq @{}.GetType() } ) {
-            $Value[$key] = ConvertTo-PsObject [Ordered]$Value[$key]
-        }
-    
-        New-Object PSObject -Property $Value | Write-Output
+    foreach ( $key in $Value.Keys | Where-Object { $Value[$_].GetType() -eq @{}.GetType() } ) {
+        $Value[$key] = ConvertTo-PsObject [Ordered]$Value[$key]
     }
+    
+    New-Object PSObject -Property $Value | Write-Output
+}
 # SIG # Begin signature block
-# MIIyBAYJKoZIhvcNAQcCoIIx9TCCMfECAQExDzANBglghkgBZQMEAgEFADB5Bgor
+# MIIx/wYJKoZIhvcNAQcCoIIx8DCCMewCAQExDzANBglghkgBZQMEAgEFADB5Bgor
 # BgEEAYI3AgEEoGswaTA0BgorBgEEAYI3AgEeMCYCAwEAAAQQH8w7YFlLCE63JNLG
-# KX7zUQIBAAIBAAIBAAIBAAIBADAxMA0GCWCGSAFlAwQCAQUABCBQ2ZgWTWgHHgjL
-# sl5kWuavT9hUbMz08wqZroW/lIi7nqCCLC8wggWNMIIEdaADAgECAhAOmxiO+dAt
+# KX7zUQIBAAIBAAIBAAIBAAIBADAxMA0GCWCGSAFlAwQCAQUABCB411v8ybAwDKYW
+# fZTDsMLmZPbrZm/ploeXdSb87MXpIaCCLCowggWNMIIEdaADAgECAhAOmxiO+dAt
 # 5+/bUOIIQBhaMA0GCSqGSIb3DQEBDAUAMGUxCzAJBgNVBAYTAlVTMRUwEwYDVQQK
 # EwxEaWdpQ2VydCBJbmMxGTAXBgNVBAsTEHd3dy5kaWdpY2VydC5jb20xJDAiBgNV
 # BAMTG0RpZ2lDZXJ0IEFzc3VyZWQgSUQgUm9vdCBDQTAeFw0yMjA4MDEwMDAwMDBa
@@ -366,10 +398,10 @@ Function Get-DirectoryTreeSize {
 # 4CPe+AOk9kVH5c64A0JH6EE2cXet/aLol3ROLtoeHYxayB6a1cLwxiKoT5u92Bya
 # UcQvmvZfpyeXupYuhVfAYOd4Vn9q78KVmksRAsiCnMkaBXy6cbVOepls9Oie1FqY
 # yJ+/jbsYXEP10Cro4mLueATbvdH7WwqocH7wl4R44wgDXUcsY6glOJcB0j862uXl
-# 9uab3H4szP8XTE0AotjWAQ64i+7m4HJViSwnGWH2dwGMMIIJAzCCBuugAwIBAgIQ
-# Qi2Wx+MyAYhFE03ldXYDqjANBgkqhkiG9w0BAQsFADBDMQswCQYDVQQGEwJERTEW
+# 9uab3H4szP8XTE0AotjWAQ64i+7m4HJViSwnGWH2dwGMMIII/jCCBuagAwIBAgIQ
+# cpdzudEVA4dLBRRudhfFuDANBgkqhkiG9w0BAQsFADBDMQswCQYDVQQGEwJERTEW
 # MBQGA1UECgwNRGF0YXBvcnQgQcO2UjEcMBoGA1UEAwwTRGF0YXBvcnQgUm9vdCBD
-# QSAwMjAeFw0xNTA1MTIxMjM5MzJaFw0yNzA1MTIxMjQ5MjlaMEMxCzAJBgNVBAYT
+# QSAwMjAeFw0xNTA1MTIxMjM5MzJaFw0zMzA0MjcxNzA5MDNaMEMxCzAJBgNVBAYT
 # AkRFMRYwFAYDVQQKDA1EYXRhcG9ydCBBw7ZSMRwwGgYDVQQDDBNEYXRhcG9ydCBS
 # b290IENBIDAyMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEA5FxNtonA
 # wgvllFOiEfM8KMSFGq8VxolE7uFC6hahzT63BTZ9gbdDxuybN7XPJ7uK02e62vXe
@@ -382,117 +414,117 @@ Function Get-DirectoryTreeSize {
 # Y7aAIF0V58nr982G8sGLb94yFNuBnMXmfRKzZY2daCSrRS0pBNB8NS8iLnoPCkEu
 # xqmQn9C8jrtby0e4VrD8/kYFe3bm6hkx9Cujpt68N5SQWqgmAoX8vAmqWcPckCvr
 # k9rGml+2ae538oJuxwAVN9f0W6vZnTune0yWkvF12SfAwpuKoTsqdcRuXmtuTn/v
-# HakWTg3EfR+ohsLopv8/xy2Upv10FV8Y0+8CAwEAAaOCA/EwggPtMA4GA1UdDwEB
+# HakWTg3EfR+ohsLopv8/xy2Upv10FV8Y0+8CAwEAAaOCA+wwggPoMA4GA1UdDwEB
 # /wQEAwIBBjASBgNVHRMBAf8ECDAGAQH/AgEBMB0GA1UdDgQWBBS8xkstjZDsvSYM
-# ILBzftzuBVVLqzCCA6YGA1UdIASCA50wggOZMIH2BgsrBgEEAYKpV4N9AjCB5jAr
-# BggrBgEFBQcCARYfaHR0cDovL3BraS5zZXJ2aWNlZHBhb3IuZGUvY3BzADCBtgYI
-# KwYBBQUHAgIwgakegaYARABhAHQAYQBwAG8AcgB0ACAAQQD2AFIAIAAtACAAWgBl
-# AHIAdABpAGYAaQBrAGEAdABzAHIAaQBjAGgAdABsAGkAbgBpAGUAIAB1AG4AZAAg
-# AEUAcgBrAGwA5AByAHUAbgBnACAAegB1AG0AIABaAGUAcgB0AGkAZgBpAHoAaQBl
-# AHIAdQBuAGcAcwBiAGUAdAByAGkAZQBiACAAUwBIAEEALQAyMIGlBg0rBgEEAYKp
-# V4N9gUgBMIGTMDEGCCsGAQUFBwIBFiVodHRwOi8vcGtpLnNlcnZpY2VkcGFvci5k
-# ZS9jZXJ0Y2xhc3MAMF4GCCsGAQUFBwICMFIeUABEAGEAdABhAHAAbwByAHQAIABB
-# APYAUgAgAC0AIABaAGUAcgB0AGkAZgBpAGsAYQB0AHMAawBsAGEAcwBzAGUAIAAx
-# ACAAUwBIAEEALQAyMIGlBg0rBgEEAYKpV4N9gUgCMIGTMDEGCCsGAQUFBwIBFiVo
-# dHRwOi8vcGtpLnNlcnZpY2VkcGFvci5kZS9jZXJ0Y2xhc3MAMF4GCCsGAQUFBwIC
-# MFIeUABEAGEAdABhAHAAbwByAHQAIABBAPYAUgAgAC0AIABaAGUAcgB0AGkAZgBp
-# AGsAYQB0AHMAawBsAGEAcwBzAGUAIAAyACAAUwBIAEEALQAyMIGlBg0rBgEEAYKp
-# V4N9gUgDMIGTMDEGCCsGAQUFBwIBFiVodHRwOi8vcGtpLnNlcnZpY2VkcGFvci5k
-# ZS9jZXJ0Y2xhc3MAMF4GCCsGAQUFBwICMFIeUABEAGEAdABhAHAAbwByAHQAIABB
-# APYAUgAgAC0AIABaAGUAcgB0AGkAZgBpAGsAYQB0AHMAawBsAGEAcwBzAGUAIAAz
-# ACAAUwBIAEEALQAyMIGlBg0rBgEEAYKpV4N9gUgEMIGTMDEGCCsGAQUFBwIBFiVo
-# dHRwOi8vcGtpLnNlcnZpY2VkcGFvci5kZS9jZXJ0Y2xhc3MAMF4GCCsGAQUFBwIC
-# MFIeUABEAGEAdABhAHAAbwByAHQAIABBAPYAUgAgAC0AIABaAGUAcgB0AGkAZgBp
-# AGsAYQB0AHMAawBsAGEAcwBzAGUAIAA0ACAAUwBIAEEALQAyMA0GCSqGSIb3DQEB
-# CwUAA4ICAQBXNgHgflmJY+a8SNk2oydOklLSRFYzmBrd/kVOLBrxJEhT0HE+T1la
-# qG+OUNBiusci7uc1JnRTdK/xKJN/zy3wj4tpfT/yl2RxI1DLaMLY9BQOylOFlGH2
-# atNVEx3/MGLCOZgy5YHCIDIn739GnknGbO/bkz7CyM9LKddYOQBzvWsicyXrmfcz
-# l+WgYh++2FDcrKbJ4ilsEQzdoR1Tpbxu+saJPI9RzZ8my2ZMeAxuS5uD6YgtCo/7
-# VhRf5sCgbu+fiaXTfmuCHWn2VKv4uBt97iEFzQNFixX+M0bgDyiWglM/RzVb4jTu
-# YcopEgeomshOhY/p48mal1UL9Z+iMNJPrMANrEMFEER+1oPuCqc20PBOIFZIrzww
-# XOOErCGas95qNie9wrbcWo4lTyKqcn2Tm+SD7eQliXp/I2TzmOAljjrNWMsvksFh
-# bSAAvWX/Vwh8FUncr+/I4gD8QfM0ZGWfVpaSNKtbVfZf4yxwqhz9OlWdot66jfnE
-# AOeKMOgbpkw0qqyifBWLPTIOePwZqM4OrBngp4aqrlYu8xAjrFdiIkUZzPb9pglx
-# HXGHhHfF7j0guNaRvj+2VvJlucU+Bij3o8tt7aZoj5AcI6cg/E51ci1CL5Yy6INP
-# jqROOu1BtzPcF4DXUcB4G9w3Cdxmmmi30invpyE9cmxDXKiy+Jgd1jCCCc0wgge1
-# oAMCAQICE24AAAAOj6Qi5kPJXt0AAQAAAA4wDQYJKoZIhvcNAQELBQAwQzELMAkG
-# A1UEBhMCREUxFjAUBgNVBAoMDURhdGFwb3J0IEHDtlIxHDAaBgNVBAMME0RhdGFw
-# b3J0IFJvb3QgQ0EgMDIwHhcNMjEwNDI3MTcyODMzWhcNMjcwNDI3MTczODMzWjA+
-# MQswCQYDVQQGEwJERTEWMBQGA1UECgwNRGF0YXBvcnQgQcO2UjEXMBUGA1UEAwwO
-# RGF0YXBvcnQgQ0EgMDMwggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIKAoICAQCm
-# lpPD42Pdj8Z5Uy/YwVRAi4rZ+48T/HX5PRENM1xkfM0QYpVEkpO68tTSe/zQ9WlE
-# U9/hJ38RK1DpPuzDR2Gh3tgSCHH/CpxPvoOIDRXcingVUNEJRWUYbKlzzIFBlYUh
-# 5c/DBpzZwXj1k6bgqeMILxL3/ogI7BZFFIKzAmsiv9OvegP3mz24PdAkZRAYHZym
-# OqJta46t0y30BxwL41vLDFasbCTBvpizbYjPiR9+q4aviFPgRkDnHSLnEYi8Ws89
-# +gvOm+oDOdyU0h/dM3GzH5jBIIWjoaxkCs8/F07zG0PhHHDddUmUa4Aekl+4EcT9
-# T3eLc4KdwZOZUaGInSMP5vcQ3GeqsnfINP0AQDM60c9qlYQvshdpOdM/YADnfHju
-# QqBSpI3In8HpZQgGSkHrhT5UwFFA3p78G4RFfl+D1K/ljygPscJt/GJ4uOI0N5pZ
-# J6fBL4KE0CaMonkjtLXnqxvs24cOdzxNj2RoOEM62kH24FbMeTJILUuAWSSk2SeW
-# SOaXUl3eD+8gDgnvlIDORRomgRg0VrYFWUwVWtM1CnbyM/fexw/xMB+sWw6zeZyA
-# i/7KXn2XWEj2PGnktcII3YgtBtQTArvSEY+0+x+k1JAQCM7lqhCezYtMOgX78QDt
-# ChZsSEV38utcuYEsnAL5EedvMhltVDjDeeA73YiJxQIDAQABo4IEvTCCBLkwDgYD
-# VR0PAQH/BAQDAgEGMB0GA1UdDgQWBBRots8SDUx7xuiv1fkYvjrBZ7druDCCA6YG
-# A1UdIASCA50wggOZMIH2BgsrBgEEAYKpV4N9AjCB5jArBggrBgEFBQcCARYfaHR0
-# cDovL3BraS5zZXJ2aWNlZHBhb3IuZGUvY3BzADCBtgYIKwYBBQUHAgIwgakegaYA
+# ILBzftzuBVVLqzCCA6EGA1UdIASCA5gwggOUMIH1BgsrBgEEAYKpV4N9AjCB5TAq
+# BggrBgEFBQcCARYeaHR0cDovL3BraS5zZXJ2aWNlZHBhb3IuZGUvY3BzMIG2Bggr
+# BgEFBQcCAjCBqR6BpgBEAGEAdABhAHAAbwByAHQAIABBAPYAUgAgAC0AIABaAGUA
+# cgB0AGkAZgBpAGsAYQB0AHMAcgBpAGMAaAB0AGwAaQBuAGkAZQAgAHUAbgBkACAA
+# RQByAGsAbADkAHIAdQBuAGcAIAB6AHUAbQAgAFoAZQByAHQAaQBmAGkAegBpAGUA
+# cgB1AG4AZwBzAGIAZQB0AHIAaQBlAGIAIABTAEgAQQAtADIwgaQGDSsGAQQBgqlX
+# g32BSAEwgZIwMAYIKwYBBQUHAgEWJGh0dHA6Ly9wa2kuc2VydmljZWRwYW9yLmRl
+# L2NlcnRjbGFzczBeBggrBgEFBQcCAjBSHlAARABhAHQAYQBwAG8AcgB0ACAAQQD2
+# AFIAIAAtACAAWgBlAHIAdABpAGYAaQBrAGEAdABzAGsAbABhAHMAcwBlACAAMQAg
+# AFMASABBAC0AMjCBpAYNKwYBBAGCqVeDfYFIAjCBkjAwBggrBgEFBQcCARYkaHR0
+# cDovL3BraS5zZXJ2aWNlZHBhb3IuZGUvY2VydGNsYXNzMF4GCCsGAQUFBwICMFIe
+# UABEAGEAdABhAHAAbwByAHQAIABBAPYAUgAgAC0AIABaAGUAcgB0AGkAZgBpAGsA
+# YQB0AHMAawBsAGEAcwBzAGUAIAAyACAAUwBIAEEALQAyMIGkBg0rBgEEAYKpV4N9
+# gUgDMIGSMDAGCCsGAQUFBwIBFiRodHRwOi8vcGtpLnNlcnZpY2VkcGFvci5kZS9j
+# ZXJ0Y2xhc3MwXgYIKwYBBQUHAgIwUh5QAEQAYQB0AGEAcABvAHIAdAAgAEEA9gBS
+# ACAALQAgAFoAZQByAHQAaQBmAGkAawBhAHQAcwBrAGwAYQBzAHMAZQAgADMAIABT
+# AEgAQQAtADIwgaQGDSsGAQQBgqlXg32BSAQwgZIwMAYIKwYBBQUHAgEWJGh0dHA6
+# Ly9wa2kuc2VydmljZWRwYW9yLmRlL2NlcnRjbGFzczBeBggrBgEFBQcCAjBSHlAA
 # RABhAHQAYQBwAG8AcgB0ACAAQQD2AFIAIAAtACAAWgBlAHIAdABpAGYAaQBrAGEA
-# dABzAHIAaQBjAGgAdABsAGkAbgBpAGUAIAB1AG4AZAAgAEUAcgBrAGwA5AByAHUA
-# bgBnACAAegB1AG0AIABaAGUAcgB0AGkAZgBpAHoAaQBlAHIAdQBuAGcAcwBiAGUA
-# dAByAGkAZQBiACAAUwBIAEEALQAyMIGlBg0rBgEEAYKpV4N9gUgBMIGTMDEGCCsG
-# AQUFBwIBFiVodHRwOi8vcGtpLnNlcnZpY2VkcGFvci5kZS9jZXJ0Y2xhc3MAMF4G
-# CCsGAQUFBwICMFIeUABEAGEAdABhAHAAbwByAHQAIABBAPYAUgAgAC0AIABaAGUA
-# cgB0AGkAZgBpAGsAYQB0AHMAawBsAGEAcwBzAGUAIAAxACAAUwBIAEEALQAyMIGl
-# Bg0rBgEEAYKpV4N9gUgCMIGTMDEGCCsGAQUFBwIBFiVodHRwOi8vcGtpLnNlcnZp
-# Y2VkcGFvci5kZS9jZXJ0Y2xhc3MAMF4GCCsGAQUFBwICMFIeUABEAGEAdABhAHAA
-# bwByAHQAIABBAPYAUgAgAC0AIABaAGUAcgB0AGkAZgBpAGsAYQB0AHMAawBsAGEA
-# cwBzAGUAIAAyACAAUwBIAEEALQAyMIGlBg0rBgEEAYKpV4N9gUgDMIGTMDEGCCsG
-# AQUFBwIBFiVodHRwOi8vcGtpLnNlcnZpY2VkcGFvci5kZS9jZXJ0Y2xhc3MAMF4G
-# CCsGAQUFBwICMFIeUABEAGEAdABhAHAAbwByAHQAIABBAPYAUgAgAC0AIABaAGUA
-# cgB0AGkAZgBpAGsAYQB0AHMAawBsAGEAcwBzAGUAIAAzACAAUwBIAEEALQAyMIGl
-# Bg0rBgEEAYKpV4N9gUgEMIGTMDEGCCsGAQUFBwIBFiVodHRwOi8vcGtpLnNlcnZp
-# Y2VkcGFvci5kZS9jZXJ0Y2xhc3MAMF4GCCsGAQUFBwICMFIeUABEAGEAdABhAHAA
-# bwByAHQAIABBAPYAUgAgAC0AIABaAGUAcgB0AGkAZgBpAGsAYQB0AHMAawBsAGEA
-# cwBzAGUAIAA0ACAAUwBIAEEALQAyMBIGA1UdEwEB/wQIMAYBAf8CAQAwHwYDVR0j
-# BBgwFoAUvMZLLY2Q7L0mDCCwc37c7gVVS6swTQYDVR0fBEYwRDBCoECgPoY8aHR0
-# cDovL3BraS5zZXJ2aWNlZHBhb3IuZGUvY3JsL0RhdGFwb3J0JTIwUm9vdCUyMENB
-# JTIwMDIuY3JsMFoGCCsGAQUFBwEBBE4wTDBKBggrBgEFBQcwAoY+aHR0cDovL3Br
-# aS5zZXJ2aWNlZHBhb3IuZGUvY2EvRGF0YXBvcnQlMjBSb290JTIwQ0ElMjAwMigx
-# KS5jcnQwDQYJKoZIhvcNAQELBQADggIBAGQVb4nvCW0mFEs8YkBIINvv5A2Gl1Aa
-# 0ooIdavAVZClL3WGMS3DA7+4SW186joz8KsW21sWhwOb5U7kvXGnJZkCvMMRUouF
-# sgjhBvN9P9x60g5CsNIJBRziuz2/bcufuzexQIlUk4JoSv1n+jptzYH1sOrMV3LS
-# Fw27AtIxGsreGcczRKZKAw3QOEfpTyT3OemjrL+Q5o0E+Oe55A2Flgp8JGPewz4N
-# r1XNZ4W9g1U8r3XCwKEOdxSppq5Ey8nA125vsjwbhln97GwN706yv3kRAK11uMPC
-# HtSt7N+W6M5XNXcGT+82koVtS+hYVF/MHjYajyUGwSBmZzRa7pG+V9uupPJjlLLW
-# jRvMq1DhXSqSI9jxrsRfgY3+2FI08/vMnT1eZ76rnYrwEI8J4TkrXSMmEdMLlIXk
-# kq1B2+rdra+H9HoD4nwCn6PrRiI7JABuRbrrJNDCBWO228kWUC9yCF20Ww0tc4sR
-# wCGmBwbZ6hc+eB6uCLQMMi4Gx2la7MBEwpVtwC83E54F04DvGf5C4N1P4TwqDc62
-# yJsXrAmpKjnrH+G5hMfSLy0g/Z5Y7CUizId33BwETwwy4XhdyFcmB0tuTXLrY7LJ
-# nJtf5pNBZhBy4xXf0eYKCt9S2UMrj4UxdsBQKqqhxQfoNimG/znXGiM5fRsED9C5
-# ytdePBrGZ9g4MYIFKzCCBScCAQEwVTA+MQswCQYDVQQGEwJERTEWMBQGA1UECgwN
-# RGF0YXBvcnQgQcO2UjEXMBUGA1UEAwwORGF0YXBvcnQgQ0EgMDMCExQAAJjtUogZ
-# KFaevxsAAgAAmO0wDQYJYIZIAWUDBAIBBQCggYQwGAYKKwYBBAGCNwIBDDEKMAig
-# AoAAoQKAADAZBgkqhkiG9w0BCQMxDAYKKwYBBAGCNwIBBDAcBgorBgEEAYI3AgEL
-# MQ4wDAYKKwYBBAGCNwIBFTAvBgkqhkiG9w0BCQQxIgQgatF5COezApNG8E5Y+PTF
-# sonu01fIqLmL1YRkzYZtzxswDQYJKoZIhvcNAQEBBQAEggEAf6Mc2XsElfWI8Vm+
-# 0bEDEZznAbmLacXvzrRONOZ3R0rqnJIOU1QOQZsi/SzqyFFgvzFpBrYRkzli8Vzf
-# +DbM0YCa9sSPpuMTO9a55XIo+WmC8bbEatmvHtGnwQbb0e/hYUkOkKd3SLsVWh5a
-# vMDJKvssOvemUJe/YkfbmddIxUUSB4WLlB9UhCRqk/QPEHqJq7HOqHyDZW2gGRow
-# UqAEkyin3F9ZUFk/3cqYlM9nJievjzl1k1zbphA8S58FpZosvegRDwamXiSIQIAi
-# 4PjoMFsSWZ23b0JRPAMoUWQjuOTMv3aRsoDeLKkCXRKjpGGuwvQepDXVBHymJVWe
-# YXUCNaGCAyAwggMcBgkqhkiG9w0BCQYxggMNMIIDCQIBATB3MGMxCzAJBgNVBAYT
-# AlVTMRcwFQYDVQQKEw5EaWdpQ2VydCwgSW5jLjE7MDkGA1UEAxMyRGlnaUNlcnQg
-# VHJ1c3RlZCBHNCBSU0E0MDk2IFNIQTI1NiBUaW1lU3RhbXBpbmcgQ0ECEAxNaXJL
-# lPo8Kko9KQeAPVowDQYJYIZIAWUDBAIBBQCgaTAYBgkqhkiG9w0BCQMxCwYJKoZI
-# hvcNAQcBMBwGCSqGSIb3DQEJBTEPFw0yMjA5MjkxNTI5MjBaMC8GCSqGSIb3DQEJ
-# BDEiBCDtGrRUEPO+gF03Ci8Oi8NUKcSLte7huCetXqfFR3tPxDANBgkqhkiG9w0B
-# AQEFAASCAgABdWuYhtumg/pgqf17mPSNieFNeACtzB5iK1Kb1U3uC9AqAAyarX9S
-# jTLcDHaLhkOIV2XGGHbwwKHOo251+aUOe/gnDjvKIQn/r2hb9I5dIMop6uNJNIux
-# Ipheyz2Azh/quLdX7+MUzQdY3L3cvhzYIxr9WoB2Uej3Ys98JO9AEWwk6afzaWIE
-# foecb3d85N1V/k63kpaH5MRYhlphylcOCb9caPc8PMEzaI2bWMbhUM9MhbYhP1D4
-# dD2OfOLYnKvdGFK3+SHADvdXLli3pKPEOpySu3uy2lFhTQ99FT9V/8mKMW1Hqtd/
-# bBu+MKW06wS9Dvi15vz4tKBMyg40dEyGlD0GRt4nptBi+U/sNgwKfud54RyigdKN
-# KkiPq3ijVpu4xTx/fh7o7W1Q1u07Hz9a90nXaZMpoLdOpKDdrrPy9MQZCcg2oBsi
-# QRQraKmubGuVxLqOz1zHCYIb2PdEWZSGwKTKaaWx37TZAD7cPXalJGkiaNKaHjle
-# uqDESIbmGu6fLCF2MjJJxVWcGBciWiLW8dhy4MSEWu9XdnC4up3x1B1C8mKj3YYR
-# sFAB3o+iSCTH1aWIAzXHbsCq8iPPkejpEImZL/ggkRAn+QrK4JktCYbDUKOn9Nb2
-# BkjSO8C9LJCImf+vioYXsXJUZLQCDw0kH+4L2VPIxGThC3cOn0fGyg==
+# dABzAGsAbABhAHMAcwBlACAANAAgAFMASABBAC0AMjANBgkqhkiG9w0BAQsFAAOC
+# AgEAGDl9+U+Cq5l0SECvwDpKiOEF6GBm6cwI0++rqO2rDzg5MiCmiMCGlYmGgJnF
+# e6cxNWGEQsGHMDUnnCbefQH8xt8kg6PPXAl57Va6ZOa+Eb+tI/ohoM7XfKR6Mchm
+# wIr29lv2D9LkjupP/MEG5+gB+nq0f1ZfjxzJrTod2U+WIY8w0ya4StnXwkAtzBnx
+# LReAEYOyp6Z3EFPhy8CkjtxVer1H3PoZYZI7sGvaIbBVkmKd0XGyte/Vm6ml75em
+# QuK2SpWubP2w/bangi8T8x3NTSXU7eJ3hevK9ebkS7cVqmtd+JaJSi8kI6LS5udA
+# OHtwa4Yseoslb+8h0NsOjDmzfrWOTF/fcmpAGEqhcXdncKLjqJR6gb7wo88VF53K
+# KhmRe2//fwZGMkJwVTCV4t5ZJFR3m0zb5ZqNu5GlNylXkZPOepZ5mKavPFJMj14P
+# AtYDvWzbLyo66GSxMAhhHem0+Y7V3arl2uYyPWj3AD0YM6aR7HT0FFF2/VlBP7dL
+# O0ZNz2fEMAeFXf0NbvIPhcyJR6Mmx8bWhWUS5iygAHyBSpeSDWAE9nCx9Bmt1oUd
+# pT9uJrV53wocG4hkQAR81halNXMO6kwI/hB16/daOA2dD9ewIqmR7zRykMDVboF5
+# 1oWp6A9CrmGODGXXPAgDnAhzCNJ1Ryy5PwJlqrcMLSLzz88wggnNMIIHtaADAgEC
+# AhNuAAAADo+kIuZDyV7dAAEAAAAOMA0GCSqGSIb3DQEBCwUAMEMxCzAJBgNVBAYT
+# AkRFMRYwFAYDVQQKDA1EYXRhcG9ydCBBw7ZSMRwwGgYDVQQDDBNEYXRhcG9ydCBS
+# b290IENBIDAyMB4XDTIxMDQyNzE3MjgzM1oXDTI3MDQyNzE3MzgzM1owPjELMAkG
+# A1UEBhMCREUxFjAUBgNVBAoMDURhdGFwb3J0IEHDtlIxFzAVBgNVBAMMDkRhdGFw
+# b3J0IENBIDAzMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAppaTw+Nj
+# 3Y/GeVMv2MFUQIuK2fuPE/x1+T0RDTNcZHzNEGKVRJKTuvLU0nv80PVpRFPf4Sd/
+# EStQ6T7sw0dhod7YEghx/wqcT76DiA0V3Ip4FVDRCUVlGGypc8yBQZWFIeXPwwac
+# 2cF49ZOm4KnjCC8S9/6ICOwWRRSCswJrIr/Tr3oD95s9uD3QJGUQGB2cpjqibWuO
+# rdMt9AccC+NbywxWrGwkwb6Ys22Iz4kffquGr4hT4EZA5x0i5xGIvFrPPfoLzpvq
+# AznclNIf3TNxsx+YwSCFo6GsZArPPxdO8xtD4Rxw3XVJlGuAHpJfuBHE/U93i3OC
+# ncGTmVGhiJ0jD+b3ENxnqrJ3yDT9AEAzOtHPapWEL7IXaTnTP2AA53x47kKgUqSN
+# yJ/B6WUIBkpB64U+VMBRQN6e/BuERX5fg9Sv5Y8oD7HCbfxieLjiNDeaWSenwS+C
+# hNAmjKJ5I7S156sb7NuHDnc8TY9kaDhDOtpB9uBWzHkySC1LgFkkpNknlkjml1Jd
+# 3g/vIA4J75SAzkUaJoEYNFa2BVlMFVrTNQp28jP33scP8TAfrFsOs3mcgIv+yl59
+# l1hI9jxp5LXCCN2ILQbUEwK70hGPtPsfpNSQEAjO5aoQns2LTDoF+/EA7QoWbEhF
+# d/LrXLmBLJwC+RHnbzIZbVQ4w3ngO92IicUCAwEAAaOCBL0wggS5MA4GA1UdDwEB
+# /wQEAwIBBjAdBgNVHQ4EFgQUaLbPEg1Me8bor9X5GL46wWe3a7gwggOmBgNVHSAE
+# ggOdMIIDmTCB9gYLKwYBBAGCqVeDfQIwgeYwKwYIKwYBBQUHAgEWH2h0dHA6Ly9w
+# a2kuc2VydmljZWRwYW9yLmRlL2NwcwAwgbYGCCsGAQUFBwICMIGpHoGmAEQAYQB0
+# AGEAcABvAHIAdAAgAEEA9gBSACAALQAgAFoAZQByAHQAaQBmAGkAawBhAHQAcwBy
+# AGkAYwBoAHQAbABpAG4AaQBlACAAdQBuAGQAIABFAHIAawBsAOQAcgB1AG4AZwAg
+# AHoAdQBtACAAWgBlAHIAdABpAGYAaQB6AGkAZQByAHUAbgBnAHMAYgBlAHQAcgBp
+# AGUAYgAgAFMASABBAC0AMjCBpQYNKwYBBAGCqVeDfYFIATCBkzAxBggrBgEFBQcC
+# ARYlaHR0cDovL3BraS5zZXJ2aWNlZHBhb3IuZGUvY2VydGNsYXNzADBeBggrBgEF
+# BQcCAjBSHlAARABhAHQAYQBwAG8AcgB0ACAAQQD2AFIAIAAtACAAWgBlAHIAdABp
+# AGYAaQBrAGEAdABzAGsAbABhAHMAcwBlACAAMQAgAFMASABBAC0AMjCBpQYNKwYB
+# BAGCqVeDfYFIAjCBkzAxBggrBgEFBQcCARYlaHR0cDovL3BraS5zZXJ2aWNlZHBh
+# b3IuZGUvY2VydGNsYXNzADBeBggrBgEFBQcCAjBSHlAARABhAHQAYQBwAG8AcgB0
+# ACAAQQD2AFIAIAAtACAAWgBlAHIAdABpAGYAaQBrAGEAdABzAGsAbABhAHMAcwBl
+# ACAAMgAgAFMASABBAC0AMjCBpQYNKwYBBAGCqVeDfYFIAzCBkzAxBggrBgEFBQcC
+# ARYlaHR0cDovL3BraS5zZXJ2aWNlZHBhb3IuZGUvY2VydGNsYXNzADBeBggrBgEF
+# BQcCAjBSHlAARABhAHQAYQBwAG8AcgB0ACAAQQD2AFIAIAAtACAAWgBlAHIAdABp
+# AGYAaQBrAGEAdABzAGsAbABhAHMAcwBlACAAMwAgAFMASABBAC0AMjCBpQYNKwYB
+# BAGCqVeDfYFIBDCBkzAxBggrBgEFBQcCARYlaHR0cDovL3BraS5zZXJ2aWNlZHBh
+# b3IuZGUvY2VydGNsYXNzADBeBggrBgEFBQcCAjBSHlAARABhAHQAYQBwAG8AcgB0
+# ACAAQQD2AFIAIAAtACAAWgBlAHIAdABpAGYAaQBrAGEAdABzAGsAbABhAHMAcwBl
+# ACAANAAgAFMASABBAC0AMjASBgNVHRMBAf8ECDAGAQH/AgEAMB8GA1UdIwQYMBaA
+# FLzGSy2NkOy9JgwgsHN+3O4FVUurME0GA1UdHwRGMEQwQqBAoD6GPGh0dHA6Ly9w
+# a2kuc2VydmljZWRwYW9yLmRlL2NybC9EYXRhcG9ydCUyMFJvb3QlMjBDQSUyMDAy
+# LmNybDBaBggrBgEFBQcBAQROMEwwSgYIKwYBBQUHMAKGPmh0dHA6Ly9wa2kuc2Vy
+# dmljZWRwYW9yLmRlL2NhL0RhdGFwb3J0JTIwUm9vdCUyMENBJTIwMDIoMSkuY3J0
+# MA0GCSqGSIb3DQEBCwUAA4ICAQBkFW+J7wltJhRLPGJASCDb7+QNhpdQGtKKCHWr
+# wFWQpS91hjEtwwO/uEltfOo6M/CrFttbFocDm+VO5L1xpyWZArzDEVKLhbII4Qbz
+# fT/cetIOQrDSCQUc4rs9v23Ln7s3sUCJVJOCaEr9Z/o6bc2B9bDqzFdy0hcNuwLS
+# MRrK3hnHM0SmSgMN0DhH6U8k9znpo6y/kOaNBPjnueQNhZYKfCRj3sM+Da9VzWeF
+# vYNVPK91wsChDncUqaauRMvJwNdub7I8G4ZZ/exsDe9Osr95EQCtdbjDwh7Urezf
+# lujOVzV3Bk/vNpKFbUvoWFRfzB42Go8lBsEgZmc0Wu6RvlfbrqTyY5Sy1o0bzKtQ
+# 4V0qkiPY8a7EX4GN/thSNPP7zJ09Xme+q52K8BCPCeE5K10jJhHTC5SF5JKtQdvq
+# 3a2vh/R6A+J8Ap+j60YiOyQAbkW66yTQwgVjttvJFlAvcghdtFsNLXOLEcAhpgcG
+# 2eoXPngergi0DDIuBsdpWuzARMKVbcAvNxOeBdOA7xn+QuDdT+E8Kg3OtsibF6wJ
+# qSo56x/huYTH0i8tIP2eWOwlIsyHd9wcBE8MMuF4XchXJgdLbk1y62OyyZybX+aT
+# QWYQcuMV39HmCgrfUtlDK4+FMXbAUCqqocUH6DYphv851xojOX0bBA/QucrXXjwa
+# xmfYODGCBSswggUnAgEBMFUwPjELMAkGA1UEBhMCREUxFjAUBgNVBAoMDURhdGFw
+# b3J0IEHDtlIxFzAVBgNVBAMMDkRhdGFwb3J0IENBIDAzAhMUAACY7VKIGShWnr8b
+# AAIAAJjtMA0GCWCGSAFlAwQCAQUAoIGEMBgGCisGAQQBgjcCAQwxCjAIoAKAAKEC
+# gAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcCAQQwHAYKKwYBBAGCNwIBCzEOMAwG
+# CisGAQQBgjcCARUwLwYJKoZIhvcNAQkEMSIEIB2iUtngrOO1uETRKsWBMAaGAflT
+# LwuK+pjUrunLzSoSMA0GCSqGSIb3DQEBAQUABIIBAFpCi8ythoeO4dCyerM41OT/
+# 9yp6RTjvFPAlSK18roGz38nfYayPANfA9kXNldm+u18FEwQvM4z3shk8sLjK0QX+
+# UfYQUZ9iEyiVkK7VuQm76nYdJwtI8FybmAeHg0usSIATn5enLoWwF1o/oYwdfpLD
+# KLAZ8YRVyS1UNIfgfatfJAQf72akGjj04FWtipXLjnj8qU7SjE5dwbGgh6GYbLGo
+# 2CnEYt/Z/bdJCInZSiI0qdietezWb3av5u2oueye87yEgcaKNTu+bySYbdE9B0I2
+# qF2I07cNLsNbJDw1sHU3gy1v5Rtf3/iB5WJPkHfUmZvhOZVCEwmftuil6TD8wKmh
+# ggMgMIIDHAYJKoZIhvcNAQkGMYIDDTCCAwkCAQEwdzBjMQswCQYDVQQGEwJVUzEX
+# MBUGA1UEChMORGlnaUNlcnQsIEluYy4xOzA5BgNVBAMTMkRpZ2lDZXJ0IFRydXN0
+# ZWQgRzQgUlNBNDA5NiBTSEEyNTYgVGltZVN0YW1waW5nIENBAhAMTWlyS5T6PCpK
+# PSkHgD1aMA0GCWCGSAFlAwQCAQUAoGkwGAYJKoZIhvcNAQkDMQsGCSqGSIb3DQEH
+# ATAcBgkqhkiG9w0BCQUxDxcNMjIxMDE5MTEyNTU4WjAvBgkqhkiG9w0BCQQxIgQg
+# VFwj+hVzI0Bn4lnGrpnBWCwfJy3/O3UEzy4iBDdOoEMwDQYJKoZIhvcNAQEBBQAE
+# ggIAb01I+FrU/ucTrlVw6vxxLCcF1sP3c3FdRqR+fDuTGDr6QV77Rjy6h8mqHsRl
+# +cQFgt4E0jxO+y+XLOQbZiYMdhgP2GywJQBJ5ssCan/RiNb7riZ3YQr8hq/0ZNpi
+# jRgSO+0VFBMUOvLXbs9jCJwvzZc5Ud8Cn+cOMpTB8wYQaABxYde/uXkl9c47rGIO
+# r3hZ2tSJYaWHpf1ZtD7qN5aK4eZ26dZL6JYCJ3hwP9r65RntLTOgENRSuDjNn4Kw
+# 2hLN4y/xxbc2cNAlxeGLwdz6KQ8GSwfbDSgkLQ2o59LNR+6tRtU+Ba5JW+tfo7zu
+# 1Hgn3KygfoKdupGnhGUNHO2j42HCeoNXNYW6u6YpJuUhBX69OKhZukhDthaVbK8i
+# iru+WasH9zht5NYC2z4VygMq9evssa/6zImnnGCpXbk50fPaK0Lsr16Lb/7oqiXd
+# Gljxk1iovi5tRfWTHW0NmtreBQjoDwTOHSvLoV0y7yuq4uEs4OJ5Zue+B3wQQcj4
+# v1BL/+uP7jt5P167hrVIxO7afTEGPfxJJIW5LtsuQDNuBqRgJnDAxCZ5Aij+dlwM
+# WUg9OffQ8gmdqbzI/t4/b9eEMV6yCzj3wdmW5IL2SesiYrcB2wfI2N8NOOUEjBKj
+# y9Ia1c5Win9GekorFVd1GokJp/7EIhvJV6OAdWtBJ7lngNo=
 # SIG # End signature block
